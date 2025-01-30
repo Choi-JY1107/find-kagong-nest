@@ -1,6 +1,6 @@
 import { IsNumber } from 'class-validator';
 
-export class FindListDto {
+export class FindListRequestDTO {
   @IsNumber()
   minLon: number;
 
@@ -12,4 +12,13 @@ export class FindListDto {
 
   @IsNumber()
   maxLat: number;
+}
+
+export class FindListResponseDTO {
+  name: string;
+  address: string;
+  lat: number;
+  lon: number;
+  openNow: boolean | string;
+  openingHours: string[] | '정보 없음';
 }
