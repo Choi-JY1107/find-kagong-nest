@@ -1,4 +1,5 @@
 import { IsNumber } from 'class-validator';
+import { PLACE_24_HOURS } from './cafe.constants';
 
 export class FindListRequestDTO {
   @IsNumber()
@@ -46,7 +47,7 @@ export class CafeStoreHoursDTO {
   constructor(day_text: string) {
     const [day, time] = day_text.split(': ');
     this.day = day;
-    if (time === '24 hours') {
+    if (time === PLACE_24_HOURS) {
       this.is24Hours = true;
       return;
     } 
