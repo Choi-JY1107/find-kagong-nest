@@ -5,7 +5,9 @@ import {
   GOOGLE_PLACES_DETAILS,
   PLACE_FIELDS,
   DEFAULT_OPENING_HOURS,
+  GOOGLE_API_ERROR_MESSAGE,
 } from './cafe.constants';
+import { CafeInfoDTO, CafeStoreHoursDTO } from './cafe.dto';
 
 @Injectable()
 export class GoogleMapsService {
@@ -21,24 +23,17 @@ export class GoogleMapsService {
   async searchNearbyCafes(lat: number, lon: number, radius: number) {
     const params = {
       location: `${lat},${lon}`,
-      radius, // 동적으로 전달된 반경 값 사용
+      radius,
       keyword: '카페',
       key: this.googleApiKey,
     };
 
     try {
       const response = await axios.get(GOOGLE_PLACES_NEARBY_SEARCH, { params });
-      return response.data.results.map((cafe: any) => ({
-        name: cafe.name,
-        address: cafe.vicinity,
-        lat: cafe.geometry.location.lat,
-        lon: cafe.geometry.location.lng,
-        openNow: cafe.opening_hours?.open_now ?? DEFAULT_OPENING_HOURS,
-        placeId: cafe.place_id, // 상세 정보 조회를 위해 저장
-      }));
+      return response.data.results.map((cafe: any) => new CafeInfoDTO(cafe, DEFAULT_OPENING_HOURS));
     } catch (error) {
       throw new HttpException(
-        'Google Places API 요청 중 오류가 발생했습니다.',
+        GOOGLE_API_ERROR_MESSAGE,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -53,14 +48,15 @@ export class GoogleMapsService {
     if (!placeId) return DEFAULT_OPENING_HOURS;
 
     const params = {
-      place_id: placeId,
+      place_id: placeId!,
       fields: PLACE_FIELDS,
       key: this.googleApiKey,
     };
 
     try {
       const response = await axios.get(GOOGLE_PLACES_DETAILS, { params });
-      return response.data.result?.opening_hours?.weekday_text || DEFAULT_OPENING_HOURS;
+      if(!response.data.result.opening_hours) return DEFAULT_OPENING_HOURS;
+      return response.data.result.opening_hours.weekday_text.map((day_text: string) => new CafeStoreHoursDTO(day_text));
     } catch (error) {
       console.error(`상세 정보 요청 실패 (placeId: ${placeId})`, error);
       return DEFAULT_OPENING_HOURS;

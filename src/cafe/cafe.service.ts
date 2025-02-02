@@ -15,16 +15,13 @@ export class CafeService {
     const radius = calculateRadius(minLat, minLon, maxLat, maxLon);
 
     // 1️⃣ 주변 카페 리스트 가져오기
-    const cafes = await this.googleMapsService.searchNearbyCafes(centerLat, centerLon, radius);
+    const cafeList = await this.googleMapsService.searchNearbyCafes(centerLat, centerLon, radius);
 
     // 2️⃣ 각 카페의 영업 시간 추가
-    const detailedCafes = await Promise.all(
-      cafes.map(async (cafe: any) => ({
-        ...cafe,
-        openingHours: await this.googleMapsService.getCafeOpeningHours(cafe.placeId),
-      })),
-    );
+    for(const cafe of cafeList) {
+      cafe.openingHours = await this.googleMapsService.getCafeOpeningHours(cafe.placeId);
+    }
 
-    return detailedCafes;
+    return cafeList;
   }
 }
