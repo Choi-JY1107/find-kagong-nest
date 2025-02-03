@@ -1,5 +1,5 @@
 import { IsNumber } from 'class-validator';
-import { PLACE_24_HOURS } from './cafe.constants';
+import { DEFAULT_OPENING_HOURS, PLACE_24_HOURS } from './cafe.constants';
 
 export class FindListRequestDTO {
   @IsNumber()
@@ -28,12 +28,12 @@ export class CafeInfoDTO {
   openNow: boolean | string;
   placeId: string;
 
-  constructor(cafe: any, defaultOpeningHours: string) {
+  constructor(cafe: any) {
     this.name = cafe.name;
     this.address = cafe.vicinity;
     this.lat = cafe.geometry.location.lat;
     this.lon = cafe.geometry.location.lng;
-    this.openNow = cafe.opening_hours?.open_now ?? defaultOpeningHours;
+    this.openNow = cafe.opening_hours?.open_now ?? DEFAULT_OPENING_HOURS;
     this.placeId = cafe.place_id;
   }
 }
